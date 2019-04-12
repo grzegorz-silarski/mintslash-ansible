@@ -1,0 +1,96 @@
+version: '3'
+services:
+  web:
+    image: ansible/awx_web:4.0.0
+    depends_on:
+      - rabbitmq
+      - memcached
+      - postgres
+    ports:
+      - "8052:8052"
+    hostname: awxweb
+    user: root
+    restart: unless-stopped
+    volumes:
+      - ./data_volumes/projects:/var/lib/awx/projects:rw
+      - ./data_volumes/SECRET_KEY:/etc/tower/SECRET_KEY
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      DATABASE_NAME: awx
+      DATABASE_USER: awx
+      DATABASE_PASSWORD: awx
+      DATABASE_PORT: 5432
+      DATABASE_HOST: postgres
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: awx
+      MEMCACHED_HOST: memcached
+      MEMCACHED_PORT: 11211
+      AWX_ADMIN_USER: admin
+      AWX_ADMIN_PASSWORD: admin
+    networks:
+      - awx-self-service
+  task:
+    image: ansible/awx_task:4.0.0
+    depends_on:
+      - rabbitmq
+      - memcached
+      - web
+      - postgres
+    hostname: awx
+    user: root
+    restart: unless-stopped
+    volumes:
+      - ./data_volumes/projects:/var/lib/awx/projects:rw
+      - ./data_volumes/SECRET_KEY:/etc/tower/SECRET_KEY
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      DATABASE_NAME: awx
+      DATABASE_USER: awx
+      DATABASE_PASSWORD: awx
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: awx
+      MEMCACHED_HOST: memcached
+      MEMCACHED_PORT: 11211
+      AWX_ADMIN_USER: admin
+      AWX_ADMIN_PASSWORD: admin
+    networks:
+      - awx-self-service
+  rabbitmq:
+    image: ansible/awx_rabbitmq:3.7.4
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_VHOST: awx
+      RABBITMQ_ERLANG_COOKIE: cookiemonster
+    networks:
+      - awx-self-service
+  memcached:
+    image: memcached:alpine
+    restart: unless-stopped
+    networks:
+      - awx-self-service
+  postgres:
+    image: postgres:9.6
+    restart: unless-stopped
+    volumes:
+      - ./data_volumes/pg:/var/lib/postgresql/data:Z
+    environment:
+      POSTGRES_USER: awx
+      POSTGRES_PASSWORD: awx
+      POSTGRES_DB: awx
+      PGDATA: /var/lib/postgresql/data/pgdata
+    networks:
+      - awx-self-service
+networks:
+  awx-self-service:
