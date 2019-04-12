@@ -1,0 +1,41 @@
+---
+- name: install java
+  package: "name={{ java_package }} state=present"
+  register: java_install
+
+- name: get java package version
+  shell: "rpm -qi {{ java_package }} | grep 'Version' | awk '{print $NF}'"
+  args:
+    warn: false
+  register: package_version
+  changed_when: false
+
+- name: get java package release
+  shell: "rpm -qi {{ java_package }} | grep 'Release' | awk '{print $NF}'"
+  args:
+    warn: false
+  register: package_release
+  changed_when: false
+
+- name: get java package architecture
+  shell: "rpm -qi {{ java_package }} | grep 'Architecture' | awk '{print $NF}'"
+  args:
+    warn: false
+  register: package_arch
+  changed_when: false
+
+- name: set default OpenJDK java version
+  alternatives:
+    name: java
+    path: "/usr/lib/jvm/{{ java_package | regex_replace('-devel') }}-{{ package_version.stdout }}-{{ package_release.stdout }}.{{ package_arch.stdout }}/jre/bin/java"
+    link: /usr/bin/java
+  when: java_set_as_default
+
+- name: set JAVA_HOME env variable
+  lineinfile:
+    dest: /etc/profile.d/JAVA_HOME.sh
+    create: yes
+    regexp: "^(export JAVA_HOME=)"
+    state: present
+    line: "export JAVA_HOME=/usr/lib/jvm/{{ java_package | regex_replace('-devel') }}-{{ package_version.stdout }}-{{ package_release.stdout }}.{{ package_arch.stdout }}"
+  when: java_set_as_default
