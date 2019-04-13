@@ -136,3 +136,9 @@ hostanme.domain.com tomcat_http_port=8080 tomcat_https_port=8443
 [tomcat-8.5.23]
 hostanme.domain.com tomcat_http_port=8080 tomcat_https_port=8443
 ```
+
+## Running Ansible palybook
+
+```text
+ansible-playbook -i inventory playbook
+```
