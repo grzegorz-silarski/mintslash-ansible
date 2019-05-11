@@ -8,6 +8,17 @@
 [Comparison #4](https://www.quora.com/Which-should-I-choose-Chef-Puppet-Ansible-SaltStack-Docker-or-something-else-if-I%E2%80%99m-looking-to-lead-an-effort-to-improve-automation-in-the-infrastructure-of-a-global-agency-with-dozens-of-simultaneous-client-specific-projects)  
 [Comparison #5](https://www.linkedin.com/pulse/very-short-comparison-ansible-chef-puppet-saltstack-niels-goossens)
 
+## Testing Ansible in Docker
+
+Linux bash:
+```docker run --rm -it --workdir /ansible -v $(pwd):/ansible willhallonline/ansible:2.7 /bin/sh```
+
+Windows PowerShell:
+```docker run --rm -it --workdir /ansible -v ${PWD}:/ansible willhallonline/ansible:2.7 /bin/sh```
+
+Ansible:
+```ansible --version```
+
 ## Setting up windows host for remote management
 
 Just run ConfigureRemotingForAnsible.ps1 script as an Administrator on a computer you'd like to be managed by Ansible.  
